@@ -1,6 +1,6 @@
 #!/bin/bash
 # File endings to check for.
-file_endings=(exe zip sql tar gz csv bz2 rar)
+file_endings=(exe zip sql tar gz csv bz2 rar dump)
 found_suspicious=false
 suspicious_files=()
 output=$(git diff --cached --name-only --diff-filter=ACM)
