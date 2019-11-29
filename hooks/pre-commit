@@ -1,0 +1,36 @@
+#!/bin/bash
+# File endings to check for.
+file_endings=(exe zip sql tar gz csv)
+found_suspicious=false
+suspicious_files=()
+output=$(git diff --cached --name-only --diff-filter=ACM)
+# Change seperator to linebreak.
+SAVEIFS=$IFS   # Save current IFS
+IFS=$'\n'      # Change IFS to new line
+# Create array from diff.
+files=($output)
+IFS=$SAVEIFS   # Restore IFS
+# Loop over files and check file ending for suspicious
+for (( i=0; i<${#files[@]}; i++ ))
+do
+        fileext=${files[$i]##*.}
+        if [[ " ${file_endings[@]} " =~ " ${fileext}" ]]; then
+                found_suspicious=true
+                suspicious_files+=(${files[$i]})
+        fi
+done
+if [ "$found_suspicious" = true ] ; then
+        echo ""
+        echo "The following files seems suspicious to commit:"
+        echo "---"
+        printf '%s\n' "${suspicious_files[@]}"
+        echo "---"
+        exec < /dev/tty
+        while read -p "Continue? (Y/n) " yn; do
+                case $yn in
+                        [Yy] ) break;;
+                        [Nn] ) echo "Please ensure the right files were added!"; exit 1;;
+                        * ) echo "Please answer y (yes) or n (no):" && continue;
+                esac
+        done
+fi
